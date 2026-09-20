@@ -182,12 +182,6 @@
             "title": "Fix AIS Vessel Tracker credentials",
             "description": "Enter a valid AISStream API key and check the tracking settings.",
             "data": {
-              "api_key": "AISStream API key",
-              "longitude_west": "West longitude",
-              "latitude_south": "South latitude",
-              "longitude_east": "East longitude",
-              "latitude_north": "North latitude",
-              "zone_radius": "Target zone radius (metres)",
               "enable_map_entities": "Create map vessel entities",
               "include_class_b": "Include Class B transponders",
               "vessel_watchlist": "MMSI watchlist (comma-separated, optional)",
@@ -195,12 +189,20 @@
               "max_map_entities": "Maximum active vessel entities",
               "searxng_url": "SearXNG URL (optional)",
               "searxng_username": "HTTP Basic Auth username for SearXNG (optional)",
-              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)"
+              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)",
+              "aisstream_enabled": "Enable AISStream source",
+              "api_key": "AISStream API key",
+              "local_mqtt_enabled": "Enable local AIS-catcher MQTT source",
+              "local_mqtt_topic": "AIS-catcher MQTT topic",
+              "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
+              "aishub_enabled": "Enable AISHub source",
+              "aishub_username": "AISHub username/API key"
             },
             "error": {
+              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
               "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_bounds": "The south/west coordinates must be lower than the north/east coordinates.",
-              "invalid_radius": "Enter a positive target zone radius.",
+              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
               "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
@@ -216,12 +218,6 @@
             "title": "Fix AIS Vessel Tracker connection",
             "description": "Check the AISStream API key and tracking settings, then try again.",
             "data": {
-              "api_key": "AISStream API key",
-              "longitude_west": "West longitude",
-              "latitude_south": "South latitude",
-              "longitude_east": "East longitude",
-              "latitude_north": "North latitude",
-              "zone_radius": "Target zone radius (metres)",
               "enable_map_entities": "Create map vessel entities",
               "include_class_b": "Include Class B transponders",
               "vessel_watchlist": "MMSI watchlist (comma-separated, optional)",
@@ -229,12 +225,20 @@
               "max_map_entities": "Maximum active vessel entities",
               "searxng_url": "SearXNG URL (optional)",
               "searxng_username": "HTTP Basic Auth username for SearXNG (optional)",
-              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)"
+              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)",
+              "aisstream_enabled": "Enable AISStream source",
+              "api_key": "AISStream API key",
+              "local_mqtt_enabled": "Enable local AIS-catcher MQTT source",
+              "local_mqtt_topic": "AIS-catcher MQTT topic",
+              "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
+              "aishub_enabled": "Enable AISHub source",
+              "aishub_username": "AISHub username/API key"
             },
             "error": {
+              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
               "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_bounds": "The south/west coordinates must be lower than the north/east coordinates.",
-              "invalid_radius": "Enter a positive target zone radius.",
+              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
               "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
@@ -250,12 +254,6 @@
             "title": "Fix the {source} AIS source",
             "description": "{source} reported: {error}. Check its settings, then try again.",
             "data": {
-              "api_key": "AISStream API key",
-              "longitude_west": "West longitude",
-              "latitude_south": "South latitude",
-              "longitude_east": "East longitude",
-              "latitude_north": "North latitude",
-              "zone_radius": "Target zone radius (metres)",
               "enable_map_entities": "Create map vessel entities",
               "include_class_b": "Include Class B transponders",
               "vessel_watchlist": "MMSI watchlist (comma-separated, optional)",
@@ -263,12 +261,20 @@
               "max_map_entities": "Maximum active vessel entities",
               "searxng_url": "SearXNG URL (optional)",
               "searxng_username": "HTTP Basic Auth username for SearXNG (optional)",
-              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)"
+              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)",
+              "aisstream_enabled": "Enable AISStream source",
+              "api_key": "AISStream API key",
+              "local_mqtt_enabled": "Enable local AIS-catcher MQTT source",
+              "local_mqtt_topic": "AIS-catcher MQTT topic",
+              "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
+              "aishub_enabled": "Enable AISHub source",
+              "aishub_username": "AISHub username/API key"
             },
             "error": {
+              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
               "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_bounds": "The south/west coordinates must be lower than the north/east coordinates.",
-              "invalid_radius": "Enter a positive target zone radius.",
+              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
               "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
@@ -284,12 +290,6 @@
             "title": "Fix AIS Vessel Tracker settings",
             "description": "Enter a valid SearXNG URL or leave it empty to disable photo lookups.",
             "data": {
-              "api_key": "AISStream API key",
-              "longitude_west": "West longitude",
-              "latitude_south": "South latitude",
-              "longitude_east": "East longitude",
-              "latitude_north": "North latitude",
-              "zone_radius": "Target zone radius (metres)",
               "enable_map_entities": "Create map vessel entities",
               "include_class_b": "Include Class B transponders",
               "vessel_watchlist": "MMSI watchlist (comma-separated, optional)",
@@ -297,12 +297,20 @@
               "max_map_entities": "Maximum active vessel entities",
               "searxng_url": "SearXNG URL (optional)",
               "searxng_username": "HTTP Basic Auth username for SearXNG (optional)",
-              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)"
+              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)",
+              "aisstream_enabled": "Enable AISStream source",
+              "api_key": "AISStream API key",
+              "local_mqtt_enabled": "Enable local AIS-catcher MQTT source",
+              "local_mqtt_topic": "AIS-catcher MQTT topic",
+              "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
+              "aishub_enabled": "Enable AISHub source",
+              "aishub_username": "AISHub username/API key"
             },
             "error": {
+              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
               "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_bounds": "The south/west coordinates must be lower than the north/east coordinates.",
-              "invalid_radius": "Enter a positive target zone radius.",
+              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
               "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
@@ -318,12 +326,6 @@
             "title": "Fix AIS Vessel Tracker HTTP Basic Auth",
             "description": "Check the HTTP Basic Auth credentials for SearXNG, or leave the URL empty to disable photo lookups.",
             "data": {
-              "api_key": "AISStream API key",
-              "longitude_west": "West longitude",
-              "latitude_south": "South latitude",
-              "longitude_east": "East longitude",
-              "latitude_north": "North latitude",
-              "zone_radius": "Target zone radius (metres)",
               "enable_map_entities": "Create map vessel entities",
               "include_class_b": "Include Class B transponders",
               "vessel_watchlist": "MMSI watchlist (comma-separated, optional)",
@@ -331,12 +333,20 @@
               "max_map_entities": "Maximum active vessel entities",
               "searxng_url": "SearXNG URL (optional)",
               "searxng_username": "HTTP Basic Auth username for SearXNG (optional)",
-              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)"
+              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)",
+              "aisstream_enabled": "Enable AISStream source",
+              "api_key": "AISStream API key",
+              "local_mqtt_enabled": "Enable local AIS-catcher MQTT source",
+              "local_mqtt_topic": "AIS-catcher MQTT topic",
+              "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
+              "aishub_enabled": "Enable AISHub source",
+              "aishub_username": "AISHub username/API key"
             },
             "error": {
+              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
               "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_bounds": "The south/west coordinates must be lower than the north/east coordinates.",
-              "invalid_radius": "Enter a positive target zone radius.",
+              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
               "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
@@ -352,12 +362,6 @@
             "title": "Fix AIS Vessel Tracker SearXNG URL",
             "description": "Check the SearXNG URL, or leave it empty to disable photo lookups.",
             "data": {
-              "api_key": "AISStream API key",
-              "longitude_west": "West longitude",
-              "latitude_south": "South latitude",
-              "longitude_east": "East longitude",
-              "latitude_north": "North latitude",
-              "zone_radius": "Target zone radius (metres)",
               "enable_map_entities": "Create map vessel entities",
               "include_class_b": "Include Class B transponders",
               "vessel_watchlist": "MMSI watchlist (comma-separated, optional)",
@@ -365,12 +369,20 @@
               "max_map_entities": "Maximum active vessel entities",
               "searxng_url": "SearXNG URL (optional)",
               "searxng_username": "HTTP Basic Auth username for SearXNG (optional)",
-              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)"
+              "searxng_password": "HTTP Basic Auth password for SearXNG (optional)",
+              "aisstream_enabled": "Enable AISStream source",
+              "api_key": "AISStream API key",
+              "local_mqtt_enabled": "Enable local AIS-catcher MQTT source",
+              "local_mqtt_topic": "AIS-catcher MQTT topic",
+              "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
+              "aishub_enabled": "Enable AISHub source",
+              "aishub_username": "AISHub username/API key"
             },
             "error": {
+              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
               "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_bounds": "The south/west coordinates must be lower than the north/east coordinates.",
-              "invalid_radius": "Enter a positive target zone radius.",
+              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
               "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
