@@ -266,10 +266,15 @@ class AisTrackerCoordinator:
                 else None
             )
             self._seen_mmsis_date[area_key] = today
-            if spotted_date == today:
-                # Already recorded today (or restored from earlier today);
-                # avoid appending a duplicate sighting for it below.
-                self._seen_mmsis_by_area[area_key] = {str(vessel["mmsi"])}
+            # Always initialize alongside _seen_mmsis_date so the two stay in
+            # sync: _handle_observation() only (re)creates this set when
+            # _seen_mmsis_date[area_key] != today, so an area whose last
+            # vessel was NOT spotted today would otherwise be marked as
+            # already-initialized-for-today here without ever getting a set,
+            # crashing every later observation for that area with KeyError.
+            self._seen_mmsis_by_area[area_key] = (
+                {str(vessel["mmsi"])} if spotted_date == today else set()
+            )
             if not spotted_time:
                 continue
             if any(
