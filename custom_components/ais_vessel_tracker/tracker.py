@@ -10,7 +10,7 @@ from datetime import UTC, date, datetime, timedelta
 from math import cos, radians, sqrt
 from typing import Any
 
-from aiohttp import WSMsgType
+from aiohttp import WSMsgType, WSServerHandshakeError
 from homeassistant.components import mqtt
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import issue_registry as ir
@@ -41,6 +41,10 @@ _AISHUB_POSITION_AGE_MINUTES = 5
 # handled below so older installs do not require a Store migration callback.
 _STORE_VERSION = 1
 _RECONNECT_DELAY = 10
+# AISStream answers 429 when too many connections are opened with one key.
+# Retrying quickly only prolongs the ban, so back off much harder.
+_RATE_LIMIT_DELAY = 120
+_RATE_LIMIT_MAX_DELAY = 1800
 # How often stale map vessels are purged. Runs on its own timer rather than
 # as a side effect of the AISStream loop, so a stuck or disconnected
 # AISStream (or a deployment with it disabled entirely) doesn't also stop
@@ -115,6 +119,14 @@ def _vessel_type(type_number: Any) -> str | None:
     return None
 
 
+def _retry_after(error: WSServerHandshakeError) -> int:
+    """Return the server's Retry-After in seconds, or 0 when absent/invalid."""
+    try:
+        return max(0, int((error.headers or {}).get("Retry-After", 0)))
+    except (TypeError, ValueError):
+        return 0
+
+
 class AisTrackerCoordinator:
     """Own AIS source connections and the current vessel data."""
 
@@ -150,6 +162,7 @@ class AisTrackerCoordinator:
         self._mqtt_unsub: Callable[[], None] | None = None
         self._purge_unsub: Callable[[], None] | None = None
         self._stopping = False
+        self._restart_lock = asyncio.Lock()
 
     @property
     def last_vessel(self) -> dict[str, Any] | None:
@@ -228,6 +241,8 @@ class AisTrackerCoordinator:
 
     async def async_start(self) -> None:
         """Restore state and start all configured AIS sources."""
+        # Starting twice would leak the first set of connections and tasks.
+        await self.async_stop()
         self._stopping = False
         stored = await self._store.async_load()
         migrated = False
@@ -319,8 +334,8 @@ class AisTrackerCoordinator:
 
     async def async_restart(self) -> None:
         """Restart the subscription after a source zone changes."""
-        await self.async_stop()
-        await self.async_start()
+        async with self._restart_lock:
+            await self.async_start()
 
     async def async_stop(self) -> None:
         """Stop all source connections."""
@@ -460,12 +475,26 @@ class AisTrackerCoordinator:
     async def _run(self) -> None:
         """Maintain a reconnecting AISStream websocket."""
         delay = _RECONNECT_DELAY
+        rate_limit_delay = _RATE_LIMIT_DELAY
         while not self._stopping:
             try:
                 await self._connect_once()
                 delay = _RECONNECT_DELAY
+                rate_limit_delay = _RATE_LIMIT_DELAY
             except asyncio.CancelledError:
                 raise
+            except WSServerHandshakeError as error:
+                self.connection_error = str(error)
+                self._set_status("Disconnected", self.connection_error)
+                if error.status == 429:
+                    delay = max(rate_limit_delay, _retry_after(error))
+                    rate_limit_delay = min(rate_limit_delay * 2, _RATE_LIMIT_MAX_DELAY)
+                    _LOGGER.warning(
+                        "AISStream rate limit hit (429); retrying in %d seconds",
+                        delay,
+                    )
+                else:
+                    _LOGGER.warning("AIS Vessel Tracker connection failed: %s", error)
             except Exception as error:  # noqa: BLE001
                 self.connection_error = str(error)
                 self._set_status("Disconnected", self.connection_error)

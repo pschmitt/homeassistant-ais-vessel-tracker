@@ -194,7 +194,17 @@ async def async_setup_entry(
     @callback
     def source_zone_changed(event: Any) -> None:
         """Restart AIS sources when a source zone moves or resizes."""
-        del event
+        # A zone's state and attributes also change whenever someone enters or
+        # leaves it; only its geometry matters for the subscription.
+        old_state = event.data.get("old_state")
+        new_state = event.data.get("new_state")
+        if old_state is not None and new_state is not None:
+            geometry = ("latitude", "longitude", "radius")
+            if all(
+                old_state.attributes.get(key) == new_state.attributes.get(key)
+                for key in geometry
+            ):
+                return
         entry.async_create_background_task(
             hass,
             tracker.async_restart(),
