@@ -146,6 +146,7 @@ class AisTrackerCoordinator:
         )
         self._task: asyncio.Task[None] | None = None
         self._aishub_task: asyncio.Task[None] | None = None
+        self._mqtt_task: asyncio.Task[None] | None = None
         self._mqtt_unsub: Callable[[], None] | None = None
         self._purge_unsub: Callable[[], None] | None = None
         self._stopping = False
@@ -295,14 +296,21 @@ class AisTrackerCoordinator:
         if migrated:
             await self._store.async_save(self._stored_data())
         self._purge_old_sightings()
+        # These loops run for the lifetime of the entry. Home Assistant waits
+        # for every tracked task (hass.async_create_task) to finish before it
+        # leaves startup, so they must be background tasks, which it does not
+        # wait for. Likewise the MQTT subscription can wait up to 30s for the
+        # client, which must not hold up integration setup.
         if self.local_mqtt_enabled:
-            await self._async_start_mqtt()
+            self._mqtt_task = self.hass.async_create_background_task(
+                self._async_start_mqtt(), name=f"{DOMAIN}_{self.entry_id}_mqtt"
+            )
         if self.aisstream_enabled and self.settings.get(CONF_API_KEY):
-            self._task = self.hass.async_create_task(
+            self._task = self.hass.async_create_background_task(
                 self._run(), name=f"{DOMAIN}_{self.entry_id}"
             )
         if self.aishub_enabled and self.aishub_username:
-            self._aishub_task = self.hass.async_create_task(
+            self._aishub_task = self.hass.async_create_background_task(
                 self._run_aishub(), name=f"{DOMAIN}_{self.entry_id}_aishub"
             )
         self._purge_unsub = async_track_time_interval(
@@ -317,13 +325,8 @@ class AisTrackerCoordinator:
     async def async_stop(self) -> None:
         """Stop all source connections."""
         self._stopping = True
-        if self._mqtt_unsub is not None:
-            self._mqtt_unsub()
-            self._mqtt_unsub = None
-        if self._purge_unsub is not None:
-            self._purge_unsub()
-            self._purge_unsub = None
-        for task_name in ("_task", "_aishub_task"):
+        # Cancel the MQTT start first so it cannot subscribe after the unsub.
+        for task_name in ("_mqtt_task", "_task", "_aishub_task"):
             task = getattr(self, task_name)
             if task is None:
                 continue
@@ -333,6 +336,12 @@ class AisTrackerCoordinator:
             except asyncio.CancelledError:
                 pass
             setattr(self, task_name, None)
+        if self._mqtt_unsub is not None:
+            self._mqtt_unsub()
+            self._mqtt_unsub = None
+        if self._purge_unsub is not None:
+            self._purge_unsub()
+            self._purge_unsub = None
 
     async def _async_start_mqtt(self) -> None:
         """Subscribe to the local AIS-catcher MQTT output."""
