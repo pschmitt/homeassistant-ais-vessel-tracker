@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-
 SOURCE_AISSTREAM = "aisstream"
 SOURCE_LOCAL_MQTT = "local_mqtt"
 SOURCE_AISHUB = "aishub"
@@ -366,9 +365,7 @@ def _eta(value: Any) -> str | None:
         return None
     hour = _int(value.get("Hour")) or 0
     minute = _int(value.get("Minute")) or 0
-    return (
-        f"{day:02d}/{month:02d} {hour:02d}:{minute:02d} UTC"
-    )
+    return f"{day:02d}/{month:02d} {hour:02d}:{minute:02d} UTC"
 
 
 def _sum_dimensions(first: Any, second: Any) -> int | None:

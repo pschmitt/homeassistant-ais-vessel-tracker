@@ -1,16 +1,25 @@
 {
   "domain": "ais_vessel_tracker",
   "name": "AIS Vessel Tracker",
-  "codeowners": ["@pschmitt"],
+  "after_dependencies": [
+    "mqtt"
+  ],
+  "codeowners": [
+    "@pschmitt"
+  ],
   "config_flow": true,
+  "dependencies": [
+    "http"
+  ],
   "documentation": "https://github.com/pschmitt/homeassistant-ais-vessel-tracker",
   "integration_type": "service",
-  "after_dependencies": ["mqtt"],
   "iot_class": "cloud_push",
   "issue_tracker": "https://github.com/pschmitt/homeassistant-ais-vessel-tracker/issues",
   "loggers": [
     "custom_components.ais_vessel_tracker"
   ],
-  "requirements": ["beautifulsoup4>=4.12.3"],
+  "requirements": [
+    "beautifulsoup4>=4.12.3"
+  ],
   "version": "3.0.0"
 }

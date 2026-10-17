@@ -10,6 +10,7 @@ from aiohttp import web
 from homeassistant.components.http import KEY_HASS
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_state_change_event
@@ -57,9 +58,7 @@ class AisVesselPhotoView(HomeAssistantView):
     # photos, addressed by an opaque config-entry ID and MMSI.
     requires_auth = False
 
-    async def get(
-        self, request: web.Request, entry_id: str, mmsi: str
-    ) -> web.Response:
+    async def get(self, request: web.Request, entry_id: str, mmsi: str) -> web.Response:
         """Return the locally cached photo for one vessel."""
         entry = request.app[KEY_HASS].config_entries.async_get_entry(entry_id)
         if entry is None or entry.domain != DOMAIN or entry.runtime_data is None:
@@ -82,9 +81,7 @@ def _platforms_for_entry(entry: AisVesselTrackerConfigEntry) -> list[str]:
     return ["sensor", "event", "binary_sensor"]
 
 
-async def async_migrate_entry(
-    hass: HomeAssistant, entry: AisVesselTrackerConfigEntry
-) -> bool:
+async def async_migrate_entry(hass: HomeAssistant, entry: AisVesselTrackerConfigEntry) -> bool:
     """Migrate legacy single-area entries to the multi-area format."""
     if entry.version < 3:
         settings = {**entry.data, **entry.options}
@@ -112,9 +109,7 @@ async def async_migrate_entry(
         options = dict(entry.options)
         if CONF_AREAS in options:
             options[CONF_AREAS] = [dict(area) for area in data_areas]
-        hass.config_entries.async_update_entry(
-            entry, data=data, options=options, version=4
-        )
+        hass.config_entries.async_update_entry(entry, data=data, options=options, version=4)
     return True
 
 
@@ -146,6 +141,9 @@ def _update_config_issues(
         )
 
 
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
+
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     """Set up the integration domain."""
     del config
@@ -154,9 +152,7 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     return True
 
 
-async def async_setup_entry(
-    hass: HomeAssistant, entry: AisVesselTrackerConfigEntry
-) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: AisVesselTrackerConfigEntry) -> bool:
     """Set up AIS Vessel Tracker from a config entry."""
     settings = {**entry.data, **entry.options}
     _update_config_issues(hass, entry, settings)
@@ -201,8 +197,7 @@ async def async_setup_entry(
         if old_state is not None and new_state is not None:
             geometry = ("latitude", "longitude", "radius")
             if all(
-                old_state.attributes.get(key) == new_state.attributes.get(key)
-                for key in geometry
+                old_state.attributes.get(key) == new_state.attributes.get(key) for key in geometry
             ):
                 return
         entry.async_create_background_task(
@@ -216,9 +211,7 @@ async def async_setup_entry(
             async_track_state_change_event(hass, source_zones, source_zone_changed)
         )
 
-    await hass.config_entries.async_forward_entry_setups(
-        entry, _platforms_for_entry(entry)
-    )
+    await hass.config_entries.async_forward_entry_setups(entry, _platforms_for_entry(entry))
 
     @callback
     def tracker_updated() -> None:
@@ -229,9 +222,7 @@ async def async_setup_entry(
 
     for photo in photos.values():
         current_vessel = tracker.last_vessels.get(photo.area_id)
-        current_mmsi = (
-            str(current_vessel.get(ATTR_MMSI) or "") if current_vessel else ""
-        )
+        current_mmsi = str(current_vessel.get(ATTR_MMSI) or "") if current_vessel else ""
         if current_mmsi and photo.image_for_mmsi(current_mmsi) is not None:
             continue
         entry.async_create_background_task(
@@ -240,13 +231,9 @@ async def async_setup_entry(
     return True
 
 
-async def async_unload_entry(
-    hass: HomeAssistant, entry: AisVesselTrackerConfigEntry
-) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: AisVesselTrackerConfigEntry) -> bool:
     """Unload AIS Vessel Tracker."""
-    unload_ok = await hass.config_entries.async_unload_platforms(
-        entry, _platforms_for_entry(entry)
-    )
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, _platforms_for_entry(entry))
     if entry.runtime_data is not None:
         await entry.runtime_data.tracker.async_stop()
     return unload_ok

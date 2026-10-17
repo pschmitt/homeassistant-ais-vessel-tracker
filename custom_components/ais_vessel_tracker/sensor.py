@@ -84,16 +84,13 @@ async def async_setup_entry(
     photos = tuple(entry.runtime_data.photos.values())
     entities: list[SensorEntity] = []
     entities.extend(
-        LastPassingVesselSensor(entry, area, index, photos)
-        for index, area in enumerate(areas, 1)
+        LastPassingVesselSensor(entry, area, index, photos) for index, area in enumerate(areas, 1)
     )
     count_sensors = [
-        VesselCountSensor(entry, area, index, period="day")
-        for index, area in enumerate(areas, 1)
+        VesselCountSensor(entry, area, index, period="day") for index, area in enumerate(areas, 1)
     ]
     count_sensors.extend(
-        VesselCountSensor(entry, area, index, period="hour")
-        for index, area in enumerate(areas, 1)
+        VesselCountSensor(entry, area, index, period="hour") for index, area in enumerate(areas, 1)
     )
     entities.extend(count_sensors)
     known: dict[str, AisMapVesselSensor] = {}
@@ -112,9 +109,7 @@ async def async_setup_entry(
         for entity in count_sensors:
             entity.async_write_ha_state()
 
-    entry.async_on_unload(
-        async_track_time_change(hass, counter_time_changed, second=0)
-    )
+    entry.async_on_unload(async_track_time_change(hass, counter_time_changed, second=0))
     entry.async_create_background_task(
         hass,
         _async_remove_orphaned_map_entities(hass, entry, set(known)),
@@ -160,14 +155,11 @@ async def _async_remove_orphaned_map_entities(
     await asyncio.sleep(0)
     registry = er.async_get(hass)
     removed = 0
-    for registry_entry in list(
-        registry.entities.get_entries_for_config_entry_id(entry.entry_id)
-    ):
+    for registry_entry in list(registry.entities.get_entries_for_config_entry_id(entry.entry_id)):
         if (
             registry_entry.platform == entry.domain
             and (registry_entry.unique_id or "").startswith("ais_vessel_")
-            and (registry_entry.unique_id or "").removeprefix("ais_vessel_")
-            not in active_mmsis
+            and (registry_entry.unique_id or "").removeprefix("ais_vessel_") not in active_mmsis
         ):
             registry.async_remove(registry_entry.entity_id)
             removed += 1
@@ -175,9 +167,7 @@ async def _async_remove_orphaned_map_entities(
         _LOGGER.info("Removed %d stale AIS vessel entities", removed)
 
 
-async def _async_remove_map_entity(
-    hass: HomeAssistant, entity: "AisMapVesselSensor"
-) -> None:
+async def _async_remove_map_entity(hass: HomeAssistant, entity: AisMapVesselSensor) -> None:
     """Remove an expired vessel entity from state and the entity registry."""
     entity_id = entity.entity_id
     await entity.async_remove(force_remove=True)
@@ -242,9 +232,7 @@ class LastPassingVesselSensor(AisVesselTrackerEntity, SensorEntity):
         url = vessel_finder_url(attributes.get("mmsi"))
         if url:
             attributes["vessel_finder_url"] = url
-        url = marine_traffic_url(
-            attributes.get("marine_traffic_vessel_id"), attributes.get("mmsi")
-        )
+        url = marine_traffic_url(attributes.get("marine_traffic_vessel_id"), attributes.get("mmsi"))
         if url:
             attributes["marinetraffic_url"] = url
         photo_coordinator = self._photo_coordinator()
@@ -262,9 +250,7 @@ class LastPassingVesselSensor(AisVesselTrackerEntity, SensorEntity):
     async def async_added_to_hass(self) -> None:
         """Subscribe to tracker updates."""
         await super().async_added_to_hass()
-        self.async_on_remove(
-            self.coordinator.async_add_listener(self.async_write_ha_state)
-        )
+        self.async_on_remove(self.coordinator.async_add_listener(self.async_write_ha_state))
         for photo in self._photos:
             self.async_on_remove(photo.async_add_listener(self.async_write_ha_state))
 
@@ -307,16 +293,12 @@ class VesselCountSensor(AisVesselTrackerEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the distinct vessels (MMSI + name) counted this period."""
-        return {
-            "vessels": self.coordinator.vessels_seen(self.area_id, period=self.period)
-        }
+        return {"vessels": self.coordinator.vessels_seen(self.area_id, period=self.period)}
 
     async def async_added_to_hass(self) -> None:
         """Subscribe to tracker updates."""
         await super().async_added_to_hass()
-        self.async_on_remove(
-            self.coordinator.async_add_listener(self.async_write_ha_state)
-        )
+        self.async_on_remove(self.coordinator.async_add_listener(self.async_write_ha_state))
 
 
 class AisMapVesselSensor(AisVesselTrackerEntity, SensorEntity):
@@ -362,10 +344,7 @@ class AisMapVesselSensor(AisVesselTrackerEntity, SensorEntity):
         """Return the authenticated HA URL for the collected map photo."""
         if self._photo_coordinator() is None:
             return None
-        return (
-            f"/api/ais_vessel_tracker/photo/"
-            f"{self.coordinator.entry_id}/{self.mmsi}"
-        )
+        return f"/api/ais_vessel_tracker/photo/{self.coordinator.entry_id}/{self.mmsi}"
 
     @property
     def name(self) -> str:
@@ -386,16 +365,12 @@ class AisMapVesselSensor(AisVesselTrackerEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return vessel position and AIS details."""
-        attributes = {
-            key: value for key, value in self._vessel.items() if not key.startswith("_")
-        }
+        attributes = {key: value for key, value in self._vessel.items() if not key.startswith("_")}
         _add_source_attributes(attributes)
         url = vessel_finder_url(attributes.get("mmsi"))
         if url:
             attributes["vessel_finder_url"] = url
-        url = marine_traffic_url(
-            attributes.get("marine_traffic_vessel_id"), attributes.get("mmsi")
-        )
+        url = marine_traffic_url(attributes.get("marine_traffic_vessel_id"), attributes.get("mmsi"))
         if url:
             attributes["marinetraffic_url"] = url
         if photo := self._photo():

@@ -19,18 +19,34 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .areas import area_bounding_box, area_id, area_zone_location, configured_areas
-from .const import (CONF_AISSTREAM_ENABLED, CONF_API_KEY,
-                    CONF_AISHUB_ENABLED, CONF_AISHUB_USERNAME,
-                    CONF_ENABLE_MAP_ENTITIES, CONF_INCLUDE_CLASS_B,
-                    CONF_INCLUDE_NON_VESSEL_STATIONS,
-                    CONF_LOCAL_MQTT_ENABLED, CONF_LOCAL_MQTT_TOPIC,
-                    CONF_MAP_TIMEOUT_MINUTES, CONF_MAX_MAP_ENTITIES,
-                    CONF_VESSEL_WATCHLIST, DOMAIN, ISSUE_AIS_AUTHENTICATION,
-                    ISSUE_AIS_CONNECTION, ISSUE_SOURCE_UNAVAILABLE)
-from .sources import (SOURCE_AISSTREAM, SOURCE_LOCAL_MQTT, AisObservation,
-                      SOURCE_AISHUB, parse_aiscatcher_message,
-                      parse_aishub_response, parse_aisstream_message,
-                      source_label)
+from .const import (
+    CONF_AISHUB_ENABLED,
+    CONF_AISHUB_USERNAME,
+    CONF_AISSTREAM_ENABLED,
+    CONF_API_KEY,
+    CONF_ENABLE_MAP_ENTITIES,
+    CONF_INCLUDE_CLASS_B,
+    CONF_INCLUDE_NON_VESSEL_STATIONS,
+    CONF_LOCAL_MQTT_ENABLED,
+    CONF_LOCAL_MQTT_TOPIC,
+    CONF_MAP_TIMEOUT_MINUTES,
+    CONF_MAX_MAP_ENTITIES,
+    CONF_VESSEL_WATCHLIST,
+    DOMAIN,
+    ISSUE_AIS_AUTHENTICATION,
+    ISSUE_AIS_CONNECTION,
+    ISSUE_SOURCE_UNAVAILABLE,
+)
+from .sources import (
+    SOURCE_AISHUB,
+    SOURCE_AISSTREAM,
+    SOURCE_LOCAL_MQTT,
+    AisObservation,
+    parse_aiscatcher_message,
+    parse_aishub_response,
+    parse_aisstream_message,
+    source_label,
+)
 
 _LOGGER = logging.getLogger(__name__)
 _AISSTREAM_URL = "wss://stream.aisstream.io/v0/stream"
@@ -153,9 +169,7 @@ class AisTrackerCoordinator:
         self._seen_mmsis_date: dict[str, date] = {}
         self._last_vessel_switch: dict[str, datetime] = {}
         self._listeners: list[Callable[[], None]] = []
-        self._store = Store(
-            hass, _STORE_VERSION, f"{DOMAIN}.last_passing_vessel_{entry_id}"
-        )
+        self._store = Store(hass, _STORE_VERSION, f"{DOMAIN}.last_passing_vessel_{entry_id}")
         self._task: asyncio.Task[None] | None = None
         self._aishub_task: asyncio.Task[None] | None = None
         self._mqtt_task: asyncio.Task[None] | None = None
@@ -378,9 +392,7 @@ class AisTrackerCoordinator:
             _LOGGER.warning("Local AIS-catcher MQTT source unavailable: %s", error)
             return
         self._set_source_status(SOURCE_LOCAL_MQTT, "Connected")
-        _LOGGER.info(
-            "Subscribed to local AIS-catcher MQTT topic %s", self.local_mqtt_topic
-        )
+        _LOGGER.info("Subscribed to local AIS-catcher MQTT topic %s", self.local_mqtt_topic)
 
     @callback
     def _mqtt_message_received(self, message: Any) -> None:
@@ -423,9 +435,7 @@ class AisTrackerCoordinator:
         username = self.aishub_username
         last = _aishub_last_request.get(username)
         if last is not None:
-            remaining = _AISHUB_POLL_INTERVAL - (
-                datetime.now(UTC) - last
-            ).total_seconds()
+            remaining = _AISHUB_POLL_INTERVAL - (datetime.now(UTC) - last).total_seconds()
             if remaining > 0:
                 await asyncio.sleep(remaining)
         _aishub_last_request[username] = datetime.now(UTC)
@@ -529,7 +539,7 @@ class AisTrackerCoordinator:
             while not self._stopping:
                 try:
                     message = await websocket.receive(timeout=60)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     continue
                 if message.type in {WSMsgType.TEXT, WSMsgType.BINARY}:
                     payload = (
@@ -552,10 +562,7 @@ class AisTrackerCoordinator:
                     WSMsgType.CLOSE,
                     WSMsgType.ERROR,
                 }:
-                    if (
-                        not confirmed
-                        and self.connection_status != "Authentication failed"
-                    ):
+                    if not confirmed and self.connection_status != "Authentication failed":
                         self._create_connection_issue()
                     raise ConnectionError(
                         "AISStream websocket closed "
@@ -585,9 +592,7 @@ class AisTrackerCoordinator:
         """Merge a normalized observation from any configured source."""
         self.source_status[observation.source] = "Connected"
         self.source_errors.pop(observation.source, None)
-        self.source_last_message[observation.source] = (
-            observation.received_at.isoformat()
-        )
+        self.source_last_message[observation.source] = observation.received_at.isoformat()
         if observation.static_data or observation.vessel_name:
             self._handle_static_data(observation)
         if observation.latitude is None or observation.longitude is None:
@@ -614,9 +619,7 @@ class AisTrackerCoordinator:
                 ),
                 "vessel_class": observation.vessel_class
                 or old_vessel.get("vessel_class", "Unknown"),
-                "icon": _NAV_ICONS.get(
-                    nav_status, old_vessel.get("icon", "mdi:ferry")
-                ),
+                "icon": _NAV_ICONS.get(nav_status, old_vessel.get("icon", "mdi:ferry")),
                 "source": observation.source,
                 "sources_seen": sorted(
                     set(old_vessel.get("sources_seen", [])) | {observation.source}
@@ -689,9 +692,7 @@ class AisTrackerCoordinator:
             area_latitude, area_longitude, radius = location
             latitude_distance = (vessel_latitude - area_latitude) * 111_320
             longitude_distance = (
-                (vessel_longitude - area_longitude)
-                * 111_320
-                * cos(radians(area_latitude))
+                (vessel_longitude - area_longitude) * 111_320 * cos(radians(area_latitude))
             )
             if sqrt(latitude_distance**2 + longitude_distance**2) <= radius:
                 matching_areas.append(area_id(area, index))
@@ -704,9 +705,7 @@ class AisTrackerCoordinator:
             "vessel_sightings": self.vessel_sightings,
         }
 
-    def _sightings_in_period(
-        self, area_key: str, *, period: str
-    ) -> list[dict[str, Any]]:
+    def _sightings_in_period(self, area_key: str, *, period: str) -> list[dict[str, Any]]:
         """Return raw sightings recorded in the current local time period."""
         now = dt_util.now()
         if period == "day":
@@ -776,9 +775,7 @@ class AisTrackerCoordinator:
         cutoff = datetime.now(UTC) - timedelta(days=2)
         for area_key, sightings in self.vessel_sightings.items():
             self.vessel_sightings[area_key] = [
-                sighting
-                for sighting in sightings
-                if self._sighting_time(sighting) >= cutoff
+                sighting for sighting in sightings if self._sighting_time(sighting) >= cutoff
             ]
 
     @staticmethod
@@ -802,9 +799,7 @@ class AisTrackerCoordinator:
             return
         oldest = sorted(
             self.vessels,
-            key=lambda mmsi: self.vessels[mmsi].get(
-                "_last_seen", datetime.min.replace(tzinfo=UTC)
-            ),
+            key=lambda mmsi: self.vessels[mmsi].get("_last_seen", datetime.min.replace(tzinfo=UTC)),
         )[:excess]
         for mmsi in oldest:
             self.vessels.pop(mmsi, None)
@@ -819,24 +814,14 @@ class AisTrackerCoordinator:
         )
         vessel = self.vessels.get(observation.mmsi)
         if vessel is not None:
-            vessel.update(
-                {
-                    key: value
-                    for key, value in static_values.items()
-                    if value is not None
-                }
-            )
+            vessel.update({key: value for key, value in static_values.items() if value is not None})
             self._notify()
         updated = False
         for last_vessel in self.last_vessels.values():
             if last_vessel.get("mmsi") != observation.mmsi:
                 continue
             last_vessel.update(
-                {
-                    key: value
-                    for key, value in static_values.items()
-                    if value is not None
-                }
+                {key: value for key, value in static_values.items() if value is not None}
             )
             updated = True
         if updated:
@@ -888,9 +873,7 @@ class AisTrackerCoordinator:
         self._notify()
 
     @callback
-    def _set_source_status(
-        self, source: str, status: str, error: str | None = None
-    ) -> None:
+    def _set_source_status(self, source: str, status: str, error: str | None = None) -> None:
         """Update a source status and notify diagnostic entities."""
         self.source_status[source] = status
         if error:
@@ -942,9 +925,7 @@ class AisTrackerCoordinator:
         )
 
     def _clear_authentication_issue(self) -> None:
-        ir.async_delete_issue(
-            self.hass, DOMAIN, f"{ISSUE_AIS_AUTHENTICATION}_{self.entry_id}"
-        )
+        ir.async_delete_issue(self.hass, DOMAIN, f"{ISSUE_AIS_AUTHENTICATION}_{self.entry_id}")
 
     def _create_connection_issue(self) -> None:
         """Create a repair when AISStream rejects the subscription."""
@@ -962,6 +943,4 @@ class AisTrackerCoordinator:
 
     def _clear_connection_issue(self) -> None:
         """Clear the subscription repair after confirmation."""
-        ir.async_delete_issue(
-            self.hass, DOMAIN, f"{ISSUE_AIS_CONNECTION}_{self.entry_id}"
-        )
+        ir.async_delete_issue(self.hass, DOMAIN, f"{ISSUE_AIS_CONNECTION}_{self.entry_id}")

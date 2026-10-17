@@ -35,14 +35,10 @@ def marine_traffic_url(vessel_id: object, mmsi: object = None) -> str | None:
     )
 
 
-def remove_legacy_entities(
-    hass: HomeAssistant, entry: ConfigEntry, unique_ids: set[str]
-) -> None:
+def remove_legacy_entities(hass: HomeAssistant, entry: ConfigEntry, unique_ids: set[str]) -> None:
     """Remove entity-registry entries from the former global model."""
     registry = er.async_get(hass)
-    for registry_entry in registry.entities.get_entries_for_config_entry_id(
-        entry.entry_id
-    ):
+    for registry_entry in registry.entities.get_entries_for_config_entry_id(entry.entry_id):
         if registry_entry.unique_id in unique_ids:
             registry.async_remove(registry_entry.entity_id)
 
@@ -65,7 +61,6 @@ class AisVesselTrackerEntity(Entity):
             manufacturer="AIS Vessel Tracker",
             model="AIS Vessel Tracker",
             configuration_url=(
-                entry.options.get(CONF_SEARXNG_URL)
-                or entry.data.get(CONF_SEARXNG_URL)
+                entry.options.get(CONF_SEARXNG_URL) or entry.data.get(CONF_SEARXNG_URL)
             ),
         )

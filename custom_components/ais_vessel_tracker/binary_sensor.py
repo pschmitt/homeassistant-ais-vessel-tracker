@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.binary_sensor import (BinarySensorDeviceClass,
-                                                      BinarySensorEntity)
+from homeassistant.components.binary_sensor import BinarySensorDeviceClass, BinarySensorEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -80,9 +79,7 @@ class SourceConnectionSensor(AisVesselTrackerEntity, BinarySensorEntity):
         if self.source == SOURCE_LOCAL_MQTT:
             attributes["topic"] = self.coordinator.local_mqtt_topic
         elif self.source == SOURCE_AISHUB:
-            attributes["poll_interval_seconds"] = (
-                self.coordinator.aishub_poll_interval_seconds
-            )
+            attributes["poll_interval_seconds"] = self.coordinator.aishub_poll_interval_seconds
         elif self.source == SOURCE_AISSTREAM and self.coordinator.vessel_watchlist:
             attributes["vessel_watchlist"] = self.coordinator.vessel_watchlist
         return attributes
@@ -90,6 +87,4 @@ class SourceConnectionSensor(AisVesselTrackerEntity, BinarySensorEntity):
     async def async_added_to_hass(self) -> None:
         """Subscribe to tracker updates."""
         await super().async_added_to_hass()
-        self.async_on_remove(
-            self.coordinator.async_add_listener(self.async_write_ha_state)
-        )
+        self.async_on_remove(self.coordinator.async_add_listener(self.async_write_ha_state))

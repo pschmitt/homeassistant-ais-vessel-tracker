@@ -85,9 +85,7 @@ class LastVesselUpdatedEvent(AisVesselTrackerEntity, EventEntity):
             "ais_vessel_tracker_vessel_updated_event",
         )
 
-    async def _async_trigger_event(
-        self, vessel: dict[str, Any], mmsi: str
-    ) -> None:
+    async def _async_trigger_event(self, vessel: dict[str, Any], mmsi: str) -> None:
         """Emit the event after the matching photo lookup has finished."""
         async with self._event_lock:
             photo = self.entry.runtime_data.photos.get(self.area_id)
@@ -97,7 +95,7 @@ class LastVesselUpdatedEvent(AisVesselTrackerEntity, EventEntity):
                         photo.async_refresh(force=True, vessel_override=vessel),
                         timeout=_PHOTO_LOOKUP_TIMEOUT,
                     )
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     _LOGGER.warning(
                         "Timed out waiting for the photo lookup for MMSI %s",
                         mmsi,

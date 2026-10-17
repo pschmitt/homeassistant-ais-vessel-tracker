@@ -21,16 +21,6 @@
           "searxng_username": "HTTP Basic Auth username for SearXNG (optional)",
           "searxng_password": "HTTP Basic Auth password for SearXNG (optional)",
           "area_count": "Number of tracking areas"
-        },
-        "error": {
-          "invalid_api_key": "Enter an AISStream API key.",
-          "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
-          "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
-          "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
-          "invalid_url": "Enter a valid HTTP or HTTPS URL.",
-          "invalid_area_name": "Enter a name for this tracking area.",
-          "invalid_bounds": "The south/west coordinates must be lower than the north/east coordinates.",
-          "invalid_radius": "Enter a positive target zone radius."
         }
       },
       "area": {
@@ -43,13 +33,20 @@
         },
         "data_description": {
           "map_radius": "If set, vessels within this larger radius are shown on the map, but only vessels inside the zone above count toward the last passing vessel and sighting totals."
-        },
-        "error": {
-          "invalid_area_name": "Enter a name for this tracking area.",
-          "invalid_zone": "Choose an existing Home Assistant zone.",
-          "map_radius_too_small": "The extended map radius must be at least the source zone's radius."
         }
       }
+    },
+    "error": {
+      "invalid_api_key": "Enter an AISStream API key.",
+      "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
+      "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+      "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
+      "invalid_url": "Enter a valid HTTP or HTTPS URL.",
+      "invalid_area_name": "Enter a name for this tracking area.",
+      "invalid_bounds": "The south/west coordinates must be lower than the north/east coordinates.",
+      "invalid_radius": "Enter a positive target zone radius.",
+      "invalid_zone": "Choose an existing Home Assistant zone.",
+      "map_radius_too_small": "The extended map radius must be at least the source zone's radius."
     }
   },
   "options": {
@@ -78,13 +75,6 @@
           "searxng_url": "SearXNG URL (optional)",
           "searxng_username": "HTTP Basic Auth username for SearXNG (optional)",
           "searxng_password": "HTTP Basic Auth password for SearXNG (leave blank to keep it)"
-        },
-        "error": {
-          "invalid_api_key": "Enter an AISStream API key.",
-          "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
-          "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
-          "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
-          "invalid_url": "Enter a valid HTTP or HTTPS URL."
         }
       },
       "aisstream": {
@@ -93,10 +83,6 @@
         "data": {
           "aisstream_enabled": "Enable AISStream source",
           "api_key": "AISStream API key (leave blank to keep it)"
-        },
-        "error": {
-          "invalid_api_key": "Enter an AISStream API key.",
-          "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub."
         }
       },
       "local_mqtt": {
@@ -109,10 +95,6 @@
         },
         "data_description": {
           "include_non_vessel_stations": "Off by default, so only vessels are shown. AIS-catcher's feed also carries non-vessel transmitters; enable this to see them on the map too."
-        },
-        "error": {
-          "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
-          "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub."
         }
       },
       "aishub": {
@@ -121,10 +103,6 @@
         "data": {
           "aishub_enabled": "Enable AISHub source",
           "aishub_username": "AISHub username/API key (leave blank to keep it)"
-        },
-        "error": {
-          "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
-          "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub."
         }
       },
       "areas": {
@@ -144,11 +122,6 @@
         },
         "data_description": {
           "map_radius": "If set, vessels within this larger radius are shown on the map, but only vessels inside the zone above count toward the last passing vessel and sighting totals."
-        },
-        "error": {
-          "invalid_area_name": "Enter a name for this tracking area.",
-          "invalid_zone": "Choose an existing Home Assistant zone.",
-          "map_radius_too_small": "The extended map radius must be at least the source zone's radius."
         }
       },
       "remove_area": {
@@ -156,21 +129,37 @@
         "description": "Remove the tracking area \"{area_name}\"?",
         "data": {
           "confirm_remove": "Remove this tracking area"
-        },
-        "error": {
-          "cannot_remove_last_area": "At least one tracking area must remain."
         }
       }
+    },
+    "error": {
+      "invalid_api_key": "Enter an AISStream API key.",
+      "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
+      "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+      "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
+      "invalid_url": "Enter a valid HTTP or HTTPS URL.",
+      "invalid_area_name": "Enter a name for this tracking area.",
+      "invalid_zone": "Choose an existing Home Assistant zone.",
+      "map_radius_too_small": "The extended map radius must be at least the source zone's radius.",
+      "cannot_remove_last_area": "At least one tracking area must remain."
     }
   },
   "entity": {
     "sensor": {
-      "last_passing_vessel": {"name": "Last Passing Vessel"},
-      "vessels_today": {"name": "Vessels Today"},
-      "vessels_this_hour": {"name": "Vessels in Last Hour"}
+      "last_passing_vessel": {
+        "name": "Last Passing Vessel"
+      },
+      "vessels_today": {
+        "name": "Vessels Today"
+      },
+      "vessels_this_hour": {
+        "name": "Vessels in Last Hour"
+      }
     },
     "event": {
-      "last_vessel_updated": {"name": "Last Vessel Updated"}
+      "last_vessel_updated": {
+        "name": "Last Vessel Updated"
+      }
     }
   },
   "issues": {
@@ -197,17 +186,19 @@
               "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
               "aishub_enabled": "Enable AISHub source",
               "aishub_username": "AISHub username/API key"
-            },
-            "error": {
-              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
-              "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
-              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
-              "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
         },
-        "abort": {"entry_not_found": "The AIS Vessel Tracker config entry no longer exists."}
+        "abort": {
+          "entry_not_found": "The AIS Vessel Tracker config entry no longer exists."
+        },
+        "error": {
+          "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
+          "invalid_api_key": "Enter an AISStream API key.",
+          "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+          "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
+          "invalid_url": "Enter a valid HTTP or HTTPS URL."
+        }
       }
     },
     "ais_connection": {
@@ -233,17 +224,19 @@
               "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
               "aishub_enabled": "Enable AISHub source",
               "aishub_username": "AISHub username/API key"
-            },
-            "error": {
-              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
-              "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
-              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
-              "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
         },
-        "abort": {"entry_not_found": "The AIS Vessel Tracker config entry no longer exists."}
+        "abort": {
+          "entry_not_found": "The AIS Vessel Tracker config entry no longer exists."
+        },
+        "error": {
+          "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
+          "invalid_api_key": "Enter an AISStream API key.",
+          "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+          "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
+          "invalid_url": "Enter a valid HTTP or HTTPS URL."
+        }
       }
     },
     "source_unavailable": {
@@ -269,17 +262,19 @@
               "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
               "aishub_enabled": "Enable AISHub source",
               "aishub_username": "AISHub username/API key"
-            },
-            "error": {
-              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
-              "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
-              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
-              "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
         },
-        "abort": {"entry_not_found": "The AIS Vessel Tracker config entry no longer exists."}
+        "abort": {
+          "entry_not_found": "The AIS Vessel Tracker config entry no longer exists."
+        },
+        "error": {
+          "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
+          "invalid_api_key": "Enter an AISStream API key.",
+          "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+          "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
+          "invalid_url": "Enter a valid HTTP or HTTPS URL."
+        }
       }
     },
     "invalid_searxng_url": {
@@ -305,17 +300,19 @@
               "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
               "aishub_enabled": "Enable AISHub source",
               "aishub_username": "AISHub username/API key"
-            },
-            "error": {
-              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
-              "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
-              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
-              "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
         },
-        "abort": {"entry_not_found": "The AIS Vessel Tracker config entry no longer exists."}
+        "abort": {
+          "entry_not_found": "The AIS Vessel Tracker config entry no longer exists."
+        },
+        "error": {
+          "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
+          "invalid_api_key": "Enter an AISStream API key.",
+          "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+          "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
+          "invalid_url": "Enter a valid HTTP or HTTPS URL."
+        }
       }
     },
     "searxng_authentication": {
@@ -341,17 +338,19 @@
               "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
               "aishub_enabled": "Enable AISHub source",
               "aishub_username": "AISHub username/API key"
-            },
-            "error": {
-              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
-              "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
-              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
-              "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
         },
-        "abort": {"entry_not_found": "The AIS Vessel Tracker config entry no longer exists."}
+        "abort": {
+          "entry_not_found": "The AIS Vessel Tracker config entry no longer exists."
+        },
+        "error": {
+          "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
+          "invalid_api_key": "Enter an AISStream API key.",
+          "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+          "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
+          "invalid_url": "Enter a valid HTTP or HTTPS URL."
+        }
       }
     },
     "searxng_endpoint": {
@@ -377,17 +376,19 @@
               "include_non_vessel_stations": "Include base stations, aids to navigation, and SAR aircraft",
               "aishub_enabled": "Enable AISHub source",
               "aishub_username": "AISHub username/API key"
-            },
-            "error": {
-              "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
-              "invalid_api_key": "Enter an AISStream API key.",
-              "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
-              "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
-              "invalid_url": "Enter a valid HTTP or HTTPS URL."
             }
           }
         },
-        "abort": {"entry_not_found": "The AIS Vessel Tracker config entry no longer exists."}
+        "abort": {
+          "entry_not_found": "The AIS Vessel Tracker config entry no longer exists."
+        },
+        "error": {
+          "no_sources": "Enable AISStream, local AIS-catcher MQTT, or AISHub.",
+          "invalid_api_key": "Enter an AISStream API key.",
+          "invalid_mqtt_topic": "Enter a valid MQTT subscription topic.",
+          "invalid_aishub_credentials": "Enter an AISHub username/API key when the source is enabled.",
+          "invalid_url": "Enter a valid HTTP or HTTPS URL."
+        }
       }
     }
   }

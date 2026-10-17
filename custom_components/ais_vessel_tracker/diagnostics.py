@@ -9,12 +9,18 @@ from homeassistant.core import HomeAssistant
 
 from . import AisVesselTrackerConfigEntry
 from .areas import configured_areas
-from .const import (CONF_AISHUB_USERNAME, CONF_API_KEY,
-                    CONF_ENABLE_MAP_ENTITIES,
-                    CONF_INCLUDE_CLASS_B, CONF_MAP_TIMEOUT_MINUTES,
-                    CONF_MAX_MAP_ENTITIES, CONF_SEARXNG_PASSWORD,
-                    CONF_SEARXNG_URL, CONF_SEARXNG_USERNAME,
-                    CONF_VESSEL_WATCHLIST)
+from .const import (
+    CONF_AISHUB_USERNAME,
+    CONF_API_KEY,
+    CONF_ENABLE_MAP_ENTITIES,
+    CONF_INCLUDE_CLASS_B,
+    CONF_MAP_TIMEOUT_MINUTES,
+    CONF_MAX_MAP_ENTITIES,
+    CONF_SEARXNG_PASSWORD,
+    CONF_SEARXNG_URL,
+    CONF_SEARXNG_USERNAME,
+    CONF_VESSEL_WATCHLIST,
+)
 
 
 async def async_get_config_entry_diagnostics(
@@ -49,9 +55,7 @@ async def async_get_config_entry_diagnostics(
         },
         "settings": {
             CONF_API_KEY: "REDACTED" if settings.get(CONF_API_KEY) else None,
-            CONF_AISHUB_USERNAME: (
-                "REDACTED" if settings.get(CONF_AISHUB_USERNAME) else None
-            ),
+            CONF_AISHUB_USERNAME: ("REDACTED" if settings.get(CONF_AISHUB_USERNAME) else None),
             CONF_ENABLE_MAP_ENTITIES: settings.get(CONF_ENABLE_MAP_ENTITIES),
             CONF_INCLUDE_CLASS_B: settings.get(CONF_INCLUDE_CLASS_B),
             CONF_VESSEL_WATCHLIST: settings.get(CONF_VESSEL_WATCHLIST),

@@ -22,9 +22,9 @@ from homeassistant.helpers.selector import (
 
 from .areas import area_form_defaults, area_from_form, configured_areas
 from .const import (
-    CONF_AISSTREAM_ENABLED,
     CONF_AISHUB_ENABLED,
     CONF_AISHUB_USERNAME,
+    CONF_AISSTREAM_ENABLED,
     CONF_API_KEY,
     CONF_AREA_COUNT,
     CONF_AREA_NAME,
@@ -32,11 +32,11 @@ from .const import (
     CONF_ENABLE_MAP_ENTITIES,
     CONF_INCLUDE_CLASS_B,
     CONF_INCLUDE_NON_VESSEL_STATIONS,
+    CONF_LOCAL_MQTT_ENABLED,
+    CONF_LOCAL_MQTT_TOPIC,
     CONF_MAP_RADIUS,
     CONF_MAP_TIMEOUT_MINUTES,
     CONF_MAX_MAP_ENTITIES,
-    CONF_LOCAL_MQTT_ENABLED,
-    CONF_LOCAL_MQTT_TOPIC,
     CONF_SEARXNG_PASSWORD,
     CONF_SEARXNG_URL,
     CONF_SEARXNG_USERNAME,
@@ -94,9 +94,7 @@ def _common_schema(
                 (
                     vol.Required(CONF_API_KEY)
                     if api_key_required
-                    else vol.Optional(
-                        CONF_API_KEY, default=defaults.get(CONF_API_KEY, "")
-                    )
+                    else vol.Optional(CONF_API_KEY, default=defaults.get(CONF_API_KEY, ""))
                 ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
                 vol.Required(
                     CONF_LOCAL_MQTT_ENABLED,
@@ -121,10 +119,8 @@ def _common_schema(
             }
         )
     if include_area_count:
-        schema[
-            vol.Required(CONF_AREA_COUNT, default=defaults.get(CONF_AREA_COUNT, 1))
-        ] = NumberSelector(
-            NumberSelectorConfig(min=1, max=_MAX_AREAS, step=1, mode="slider")
+        schema[vol.Required(CONF_AREA_COUNT, default=defaults.get(CONF_AREA_COUNT, 1))] = (
+            NumberSelector(NumberSelectorConfig(min=1, max=_MAX_AREAS, step=1, mode="slider"))
         )
     return vol.Schema(schema)
 
@@ -138,9 +134,9 @@ def _aisstream_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
                 CONF_AISSTREAM_ENABLED,
                 default=defaults.get(CONF_AISSTREAM_ENABLED, True),
             ): BooleanSelector(),
-            vol.Optional(
-                CONF_API_KEY, default=defaults.get(CONF_API_KEY, "")
-            ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
+            vol.Optional(CONF_API_KEY, default=defaults.get(CONF_API_KEY, "")): TextSelector(
+                TextSelectorConfig(type=TextSelectorType.PASSWORD)
+            ),
         }
     )
 
@@ -200,9 +196,7 @@ def _zone_options(hass: Any, selected: str | None = None) -> list[dict[str, str]
     return options
 
 
-def _area_schema(
-    defaults: dict[str, Any] | None = None, hass: Any = None
-) -> vol.Schema:
+def _area_schema(defaults: dict[str, Any] | None = None, hass: Any = None) -> vol.Schema:
     """Return the schema for one named tracking area."""
     defaults = defaults or {}
     selected_zone = defaults.get(CONF_ZONE_ENTITY, "zone.home")
@@ -211,17 +205,13 @@ def _area_schema(
             vol.Required(
                 CONF_AREA_NAME, default=defaults.get(CONF_AREA_NAME, "Home")
             ): TextSelector(),
-            vol.Required(
-                CONF_ZONE_ENTITY, default=selected_zone
-            ): SelectSelector(
+            vol.Required(CONF_ZONE_ENTITY, default=selected_zone): SelectSelector(
                 SelectSelectorConfig(options=_zone_options(hass, selected_zone))
             ),
             vol.Optional(
                 CONF_MAP_RADIUS,
                 description={"suggested_value": defaults.get(CONF_MAP_RADIUS)},
-            ): NumberSelector(
-                NumberSelectorConfig(min=1, mode="box", unit_of_measurement="m")
-            ),
+            ): NumberSelector(NumberSelectorConfig(min=1, mode="box", unit_of_measurement="m")),
         }
     )
 
@@ -241,9 +231,7 @@ def _validate_common_input(user_input: dict[str, Any]) -> str | None:
         return "invalid_mqtt_topic"
     if aishub_enabled and not str(user_input.get(CONF_AISHUB_USERNAME, "")).strip():
         return "invalid_aishub_credentials"
-    if user_input.get(CONF_SEARXNG_URL) and not _valid_url(
-        user_input[CONF_SEARXNG_URL]
-    ):
+    if user_input.get(CONF_SEARXNG_URL) and not _valid_url(user_input[CONF_SEARXNG_URL]):
         return "invalid_url"
     return None
 
@@ -290,9 +278,7 @@ def _clean_common_input(
         cleaned[CONF_LOCAL_MQTT_TOPIC] = str(
             cleaned.get(CONF_LOCAL_MQTT_TOPIC, "ais-catcher/ais")
         ).strip()
-        cleaned[CONF_AISHUB_USERNAME] = str(
-            cleaned.get(CONF_AISHUB_USERNAME, "")
-        ).strip()
+        cleaned[CONF_AISHUB_USERNAME] = str(cleaned.get(CONF_AISHUB_USERNAME, "")).strip()
     if not cleaned.get(CONF_SEARXNG_PASSWORD):
         cleaned.pop(CONF_SEARXNG_PASSWORD, None)
     cleaned[CONF_VESSEL_WATCHLIST] = ",".join(
@@ -342,9 +328,7 @@ class _AreaFlowMixin:
             if error:
                 errors["base"] = error
             else:
-                self._pending_areas.append(
-                    area_from_form(user_input, self._area_index + 1)
-                )
+                self._pending_areas.append(area_from_form(user_input, self._area_index + 1))
                 self._area_index += 1
                 if self._area_index >= self._area_count:
                     return self._async_finish_area_flow()
@@ -361,9 +345,7 @@ class _AreaFlowMixin:
         )
 
 
-class AisVesselTrackerConfigFlow(
-    _AreaFlowMixin, config_entries.ConfigFlow, domain=DOMAIN
-):
+class AisVesselTrackerConfigFlow(_AreaFlowMixin, config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for AIS Vessel Tracker."""
 
     VERSION = 4
@@ -390,9 +372,9 @@ class AisVesselTrackerConfigFlow(
                 self._pending_areas = []
                 self._area_count = area_count
                 self._area_index = 0
-                self._area_defaults = [
-                    {CONF_AREA_NAME: "Home", CONF_ZONE_ENTITY: "zone.home"}
-                ] + [{} for _ in range(area_count - 1)]
+                self._area_defaults = [{CONF_AREA_NAME: "Home", CONF_ZONE_ENTITY: "zone.home"}] + [
+                    {} for _ in range(area_count - 1)
+                ]
                 return await self._async_step_area()
 
         return self.async_show_form(
@@ -422,9 +404,7 @@ class AisVesselTrackerOptionsFlow(_AreaFlowMixin, OptionsFlowWithReload):
             return
         current = {**self.config_entry.data, **self.config_entry.options}
         self._pending_settings = {
-            key: value
-            for key, value in current.items()
-            if key not in {CONF_AREAS, "cache_photos"}
+            key: value for key, value in current.items() if key not in {CONF_AREAS, "cache_photos"}
         }
         self._pending_areas = [dict(area) for area in configured_areas(current)]
 
@@ -479,18 +459,14 @@ class AisVesselTrackerOptionsFlow(_AreaFlowMixin, OptionsFlowWithReload):
             errors=errors,
         )
 
-    async def async_step_aisstream(
-        self, user_input: dict[str, Any] | None = None
-    ):
+    async def async_step_aisstream(self, user_input: dict[str, Any] | None = None):
         """Manage the AISStream source settings."""
         self._initialize_pending()
         errors: dict[str, str] = {}
         if user_input is not None:
             candidate = {**self._pending_settings, **user_input}
             api_key = str(user_input.get(CONF_API_KEY, "")).strip()
-            candidate[CONF_API_KEY] = api_key or self._pending_settings.get(
-                CONF_API_KEY, ""
-            )
+            candidate[CONF_API_KEY] = api_key or self._pending_settings.get(CONF_API_KEY, "")
             error = _validate_common_input(candidate)
             if error:
                 errors["base"] = error
@@ -507,9 +483,7 @@ class AisVesselTrackerOptionsFlow(_AreaFlowMixin, OptionsFlowWithReload):
             errors=errors,
         )
 
-    async def async_step_local_mqtt(
-        self, user_input: dict[str, Any] | None = None
-    ):
+    async def async_step_local_mqtt(self, user_input: dict[str, Any] | None = None):
         """Manage the local AIS-catcher MQTT source settings."""
         self._initialize_pending()
         errors: dict[str, str] = {}
@@ -533,9 +507,7 @@ class AisVesselTrackerOptionsFlow(_AreaFlowMixin, OptionsFlowWithReload):
             errors=errors,
         )
 
-    async def async_step_aishub(
-        self, user_input: dict[str, Any] | None = None
-    ):
+    async def async_step_aishub(self, user_input: dict[str, Any] | None = None):
         """Manage the AISHub source settings."""
         self._initialize_pending()
         errors: dict[str, str] = {}
@@ -555,9 +527,7 @@ class AisVesselTrackerOptionsFlow(_AreaFlowMixin, OptionsFlowWithReload):
         suggested.pop(CONF_AISHUB_USERNAME, None)
         return self.async_show_form(
             step_id="aishub",
-            data_schema=self.add_suggested_values_to_schema(
-                _aishub_schema(suggested), suggested
-            ),
+            data_schema=self.add_suggested_values_to_schema(_aishub_schema(suggested), suggested),
             errors=errors,
         )
 
@@ -591,11 +561,7 @@ class AisVesselTrackerOptionsFlow(_AreaFlowMixin, OptionsFlowWithReload):
         return self.async_show_form(
             step_id="areas",
             data_schema=vol.Schema(
-                {
-                    vol.Required("area_action"): SelectSelector(
-                        SelectSelectorConfig(options=options)
-                    )
-                }
+                {vol.Required("area_action"): SelectSelector(SelectSelectorConfig(options=options))}
             ),
         )
 
@@ -624,23 +590,17 @@ class AisVesselTrackerOptionsFlow(_AreaFlowMixin, OptionsFlowWithReload):
                 if is_new:
                     self._pending_areas.append(area)
                 else:
-                    area["id"] = self._pending_areas[self._area_index].get(
-                        "id", area["id"]
-                    )
+                    area["id"] = self._pending_areas[self._area_index].get("id", area["id"])
                     self._pending_areas[self._area_index] = area
                 return await self.async_step_areas()
         return self.async_show_form(
             step_id="area",
             data_schema=_area_schema(defaults, self.hass),
-            description_placeholders={
-                "area_name": str(defaults.get(CONF_AREA_NAME, ""))
-            },
+            description_placeholders={"area_name": str(defaults.get(CONF_AREA_NAME, ""))},
             errors=errors,
         )
 
-    async def async_step_remove_area(
-        self, user_input: dict[str, Any] | None = None
-    ):
+    async def async_step_remove_area(self, user_input: dict[str, Any] | None = None):
         """Confirm removal of one tracking area."""
         errors: dict[str, str] = {}
         area = self._pending_areas[self._area_index]

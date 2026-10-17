@@ -13,8 +13,13 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import entity_registry as er
 
-from .const import (ATTR_IGNORE_CACHE, ATTR_MMSI, DOMAIN,
-                    SERVICE_PURGE_VESSEL_PHOTOS, SERVICE_REFRESH_VESSEL_PHOTO)
+from .const import (
+    ATTR_IGNORE_CACHE,
+    ATTR_MMSI,
+    DOMAIN,
+    SERVICE_PURGE_VESSEL_PHOTOS,
+    SERVICE_REFRESH_VESSEL_PHOTO,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -74,13 +79,9 @@ async def _async_refresh_vessel_photo(call: ServiceCall) -> None:
     ignore_cache = call.data.get(ATTR_IGNORE_CACHE, False)
     target_mmsis = _target_mmsis(call.hass, entity_ids) if entity_ids else set()
     if requested_mmsi is not None and target_mmsis:
-        raise ServiceValidationError(
-            "Specify either an AIS vessel target or an MMSI, not both"
-        )
+        raise ServiceValidationError("Specify either an AIS vessel target or an MMSI, not both")
 
-    selected_mmsis = target_mmsis or (
-        {requested_mmsi} if requested_mmsi is not None else None
-    )
+    selected_mmsis = target_mmsis or ({requested_mmsi} if requested_mmsi is not None else None)
     refresh_tasks = []
     found_mmsis: set[str] = set()
 
@@ -92,11 +93,7 @@ async def _async_refresh_vessel_photo(call: ServiceCall) -> None:
         vessels = (
             known_vessels
             if selected_mmsis is None
-            else {
-                mmsi: known_vessels[mmsi]
-                for mmsi in selected_mmsis
-                if mmsi in known_vessels
-            }
+            else {mmsi: known_vessels[mmsi] for mmsi in selected_mmsis if mmsi in known_vessels}
         )
         found_mmsis.update(vessels)
         if ignore_cache:
@@ -116,9 +113,7 @@ async def _async_refresh_vessel_photo(call: ServiceCall) -> None:
         missing = ", ".join(sorted(selected_mmsis - found_mmsis))
         raise ServiceValidationError(f"No known AIS vessel has MMSI {missing}")
     if not refresh_tasks:
-        raise ServiceValidationError(
-            "No known AIS vessels or configured photo lookup service"
-        )
+        raise ServiceValidationError("No known AIS vessels or configured photo lookup service")
 
     if requested_mmsi:
         scope = f" for MMSI {requested_mmsi}"
@@ -134,9 +129,7 @@ async def _async_refresh_vessel_photo(call: ServiceCall) -> None:
     results = await asyncio.gather(*refresh_tasks, return_exceptions=True)
     errors = [result for result in results if isinstance(result, Exception)]
     if errors:
-        _LOGGER.warning(
-            "AIS vessel photo refresh completed with %d error(s)", len(errors)
-        )
+        _LOGGER.warning("AIS vessel photo refresh completed with %d error(s)", len(errors))
 
 
 async def _async_purge_vessel_photos(call: ServiceCall) -> None:
@@ -150,9 +143,7 @@ async def _async_purge_vessel_photos(call: ServiceCall) -> None:
         for photo in runtime.photos.values():
             purged += await photo.async_forget_all()
             areas += 1
-    _LOGGER.info(
-        "Purged %d cached AIS vessel photo(s) across %d area(s)", purged, areas
-    )
+    _LOGGER.info("Purged %d cached AIS vessel photo(s) across %d area(s)", purged, areas)
 
 
 def async_setup_services(hass: HomeAssistant) -> None:

@@ -8,8 +8,8 @@ import logging
 import re
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
-from typing import TYPE_CHECKING, Any
 from html import unescape
+from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qs, unquote, urlencode, urljoin, urlsplit
 
 from aiohttp import BasicAuth, ClientError, ClientResponseError, ClientSession
@@ -35,9 +35,7 @@ _RETRY_INTERVAL = timedelta(minutes=5)
 _PHOTO_STORE_VERSION = 1
 
 
-def _search_photo_candidate(
-    search_html: str, searxng_url: str
-) -> tuple[str, str] | None:
+def _search_photo_candidate(search_html: str, searxng_url: str) -> tuple[str, str] | None:
     """Find a supported SearXNG image proxy URL in the result page."""
     soup = BeautifulSoup(search_html, "html.parser")
     for tag in soup.find_all(["a", "img"]):
@@ -94,9 +92,7 @@ def _tag_photo_value(tag: Any) -> str | None:
     return None
 
 
-def _vessel_finder_photo_candidate(
-    details_html: str, details_url: str
-) -> tuple[str, bool] | None:
+def _vessel_finder_photo_candidate(details_html: str, details_url: str) -> tuple[str, bool] | None:
     """Extract the main VesselFinder photo and identify placeholders."""
     soup = BeautifulSoup(details_html, "html.parser")
     tags = list(soup.select("img.main-photo"))
@@ -106,20 +102,15 @@ def _vessel_finder_photo_candidate(
         if not value:
             continue
         photo_url = urljoin(details_url, value)
-        alt_text = " ".join(
-            str(tag.get(attribute) or "") for attribute in ("alt", "title")
-        )
+        alt_text = " ".join(str(tag.get(attribute) or "") for attribute in ("alt", "title"))
         is_placeholder = bool(
-            _VESSEL_FINDER_NO_PHOTO.search(photo_url)
-            or _VESSEL_FINDER_NO_PHOTO.search(alt_text)
+            _VESSEL_FINDER_NO_PHOTO.search(photo_url) or _VESSEL_FINDER_NO_PHOTO.search(alt_text)
         )
         return photo_url, not is_placeholder
     return None
 
 
-def _vessel_finder_photo_page_url(
-    details_html: str, details_url: str
-) -> str | None:
+def _vessel_finder_photo_page_url(details_html: str, details_url: str) -> str | None:
     """Return the gallery page URL associated with the main vessel photo."""
     soup = BeautifulSoup(details_html, "html.parser")
     for tag in soup.find_all("a", href=True):
@@ -151,9 +142,7 @@ def _vessel_finder_photo_author(photo_html: str) -> str | None:
     return None
 
 
-def _marine_traffic_photo_candidate(
-    details_html: str, details_url: str
-) -> str | None:
+def _marine_traffic_photo_candidate(details_html: str, details_url: str) -> str | None:
     """Extract a MarineTraffic vessel photo from the details page."""
     soup = BeautifulSoup(details_html, "html.parser")
     for tag in soup.find_all(["img", "meta", "source"]):
@@ -271,9 +260,7 @@ class VesselPhotoCoordinator:
         # dict object, and _cached_photos is what gets persisted back to
         # the store, so popping "image" off `stored` would silently strip
         # it from the on-disk cache too.
-        self._photo_records[mmsi] = {
-            key: value for key, value in stored.items() if key != "image"
-        }
+        self._photo_records[mmsi] = {key: value for key, value in stored.items() if key != "image"}
         return self._photo_images[mmsi]
 
     def _restore_cached_photo(self, mmsi: str) -> bool:
@@ -291,9 +278,7 @@ class VesselPhotoCoordinator:
         self._image = image
         self._content_type = content_type
         self._mmsi = mmsi
-        self._marine_traffic_vessel_id = str(
-            stored.get("marine_traffic_vessel_id") or ""
-        )
+        self._marine_traffic_vessel_id = str(stored.get("marine_traffic_vessel_id") or "")
         self._vessel_name = str(stored.get("vessel_name") or "")
         self._provider = str(stored.get("provider") or "")
         self._photo_url = str(stored.get("photo_url") or "")
@@ -326,9 +311,7 @@ class VesselPhotoCoordinator:
             "photo_url": self._photo_url,
             "photo_author": self._photo_author,
             "photo_credit_url": self._photo_credit_url,
-            "last_updated": (
-                self._last_updated.isoformat() if self._last_updated else None
-            ),
+            "last_updated": (self._last_updated.isoformat() if self._last_updated else None),
         }
 
     @property
@@ -424,9 +407,7 @@ class VesselPhotoCoordinator:
             for key, value in vessel.items()
             if not key.startswith("_") and value is not None
         }
-        vessel_name = str(
-            vessel_attributes.get("vessel_name") or self._vessel_name or ""
-        )
+        vessel_name = str(vessel_attributes.get("vessel_name") or self._vessel_name or "")
         mmsi = str(vessel_attributes.get("mmsi") or self._mmsi or "")
         marine_vessel_id = str(
             vessel_attributes.get("marine_traffic_vessel_id")
@@ -435,14 +416,11 @@ class VesselPhotoCoordinator:
         )
         search_query = " ".join(part for part in (vessel_name, mmsi) if part)
         search_url = (
-            f"{self.searxng_url}/search?"
-            f"{urlencode({'q': search_query, 'categories': 'images'})}"
+            f"{self.searxng_url}/search?{urlencode({'q': search_query, 'categories': 'images'})}"
             if self.searxng_url and search_query
             else None
         )
-        photo_credit = " via ".join(
-            part for part in (self._photo_author, self._provider) if part
-        )
+        photo_credit = " via ".join(part for part in (self._photo_author, self._provider) if part)
         return {
             **vessel_attributes,
             "vessel_name": vessel_name or None,
@@ -458,9 +436,7 @@ class VesselPhotoCoordinator:
             "photo_credit_url": self._photo_credit_url or None,
             "searxng_search_query": search_query or None,
             "searxng_search_url": search_url,
-            "last_updated": self._last_updated.isoformat()
-            if self._last_updated
-            else None,
+            "last_updated": self._last_updated.isoformat() if self._last_updated else None,
             "error": self._error or None,
         }
 
@@ -473,15 +449,10 @@ class VesselPhotoCoordinator:
         mmsi = str(vessel.get("mmsi", ""))
         if mmsi != self._mmsi:
             return True
-        if (
-            self._image is not None
-            and self._photo_cacheable
-            and self._marine_traffic_vessel_id
-        ):
+        if self._image is not None and self._photo_cacheable and self._marine_traffic_vessel_id:
             return False
         return (
-            self._last_attempt is None
-            or datetime.now(UTC) - self._last_attempt >= _RETRY_INTERVAL
+            self._last_attempt is None or datetime.now(UTC) - self._last_attempt >= _RETRY_INTERVAL
         )
 
     @callback
@@ -532,9 +503,7 @@ class VesselPhotoCoordinator:
                 return
             self._vessel_name = vessel_name
             self._mmsi = mmsi
-            self._marine_traffic_vessel_id = str(
-                vessel.get("marine_traffic_vessel_id") or ""
-            )
+            self._marine_traffic_vessel_id = str(vessel.get("marine_traffic_vessel_id") or "")
             self._provider = ""
             self._photo_url = ""
             self._photo_author = ""
@@ -554,8 +523,7 @@ class VesselPhotoCoordinator:
 
             if self.searxng_url:
                 search_url = (
-                    f"{self.searxng_url}/search?"
-                    f"{urlencode({'q': query, 'categories': 'images'})}"
+                    f"{self.searxng_url}/search?{urlencode({'q': query, 'categories': 'images'})}"
                 )
                 try:
                     async with self.session.get(
@@ -574,9 +542,7 @@ class VesselPhotoCoordinator:
                     if marine_vessel_id:
                         self._marine_traffic_vessel_id = marine_vessel_id
                         self.tracker.set_marine_traffic_vessel_id(mmsi, marine_vessel_id)
-                    search_candidate = _search_photo_candidate(
-                        search_html, self.searxng_url
-                    )
+                    search_candidate = _search_photo_candidate(search_html, self.searxng_url)
                     if search_candidate:
                         photo_url, provider = search_candidate
                         photo_via_searxng = True
@@ -591,7 +557,7 @@ class VesselPhotoCoordinator:
                         mmsi,
                         err.status,
                     )
-                except (ClientError, asyncio.TimeoutError) as err:
+                except (TimeoutError, ClientError) as err:
                     _LOGGER.warning(
                         "AIS Vessel Tracker SearXNG lookup failed for %s: %s; "
                         "trying direct provider fallbacks",
@@ -601,8 +567,7 @@ class VesselPhotoCoordinator:
             else:
                 self._set_service_issue(None)
                 _LOGGER.debug(
-                    "SearXNG photo lookup is disabled for %s; trying direct "
-                    "provider fallbacks",
+                    "SearXNG photo lookup is disabled for %s; trying direct provider fallbacks",
                     mmsi,
                 )
 
@@ -624,8 +589,8 @@ class VesselPhotoCoordinator:
                             provider = "VesselFinder"
                             photo_headers["Referer"] = details_url
                             photo_auth = None
-                    except (ClientError, asyncio.TimeoutError) as err:
-                            _LOGGER.debug(
+                    except (TimeoutError, ClientError) as err:
+                        _LOGGER.debug(
                             "Direct VesselFinder photo lookup failed for %s: %s",
                             mmsi,
                             err,
@@ -640,16 +605,14 @@ class VesselPhotoCoordinator:
                         ) as response:
                             response.raise_for_status()
                             details_html = await response.text()
-                    except (ClientError, asyncio.TimeoutError) as err:
+                    except (TimeoutError, ClientError) as err:
                         _LOGGER.debug(
                             "VesselFinder credit lookup failed for %s: %s",
                             mmsi,
                             err,
                         )
                 if details_html:
-                    credit_url = _vessel_finder_photo_page_url(
-                        details_html, details_url
-                    )
+                    credit_url = _vessel_finder_photo_page_url(details_html, details_url)
                     if credit_url:
                         self._photo_credit_url = credit_url
                         try:
@@ -660,10 +623,8 @@ class VesselPhotoCoordinator:
                             ) as response:
                                 response.raise_for_status()
                                 credit_html = await response.text()
-                            self._photo_author = (
-                                _vessel_finder_photo_author(credit_html) or ""
-                            )
-                        except (ClientError, asyncio.TimeoutError) as err:
+                            self._photo_author = _vessel_finder_photo_author(credit_html) or ""
+                        except (TimeoutError, ClientError) as err:
                             _LOGGER.debug(
                                 "VesselFinder photographer lookup failed for %s: %s",
                                 mmsi,
@@ -680,27 +641,21 @@ class VesselPhotoCoordinator:
                         ) as response:
                             response.raise_for_status()
                             marine_html = await response.text()
-                        marine_photo_url = _marine_traffic_photo_candidate(
-                            marine_html, marine_url
-                        )
+                        marine_photo_url = _marine_traffic_photo_candidate(marine_html, marine_url)
                         if marine_photo_url:
                             photo_url = marine_photo_url
                             provider = "MarineTraffic"
                             photo_headers["Referer"] = marine_url
                             photo_auth = None
-                    except (ClientError, asyncio.TimeoutError) as err:
+                    except (TimeoutError, ClientError) as err:
                         _LOGGER.debug(
                             "Direct MarineTraffic photo lookup failed for %s: %s",
                             mmsi,
                             err,
                         )
             if photo_url is None:
-                self._set_error(
-                    "No SearXNG, VesselFinder, or MarineTraffic photo found"
-                )
-                _LOGGER.debug(
-                    "No photo result found for %s (%s)", vessel_name, mmsi
-                )
+                self._set_error("No SearXNG, VesselFinder, or MarineTraffic photo found")
+                _LOGGER.debug("No photo result found for %s (%s)", vessel_name, mmsi)
                 return
 
             try:
@@ -729,9 +684,7 @@ class VesselPhotoCoordinator:
                     if photo_cacheable:
                         self._photo_images[mmsi] = (image, self._content_type)
                         self._photo_records[mmsi] = {
-                            key: value
-                            for key, value in photo_data.items()
-                            if key != "image"
+                            key: value for key, value in photo_data.items() if key != "image"
                         }
                     if photo_cacheable:
                         self._cached_photos[mmsi] = photo_data
@@ -754,7 +707,7 @@ class VesselPhotoCoordinator:
                     mmsi,
                     err.status,
                 )
-            except (ClientError, asyncio.TimeoutError) as err:
+            except (TimeoutError, ClientError) as err:
                 self._set_error(f"Photo lookup failed: {err}")
                 _LOGGER.warning("AIS vessel photo lookup failed for %s: %s", mmsi, err)
             finally:

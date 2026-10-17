@@ -43,4 +43,3 @@ ISSUE_SEARXNG_ENDPOINT = "searxng_endpoint"
 ISSUE_AIS_AUTHENTICATION = "ais_authentication"
 ISSUE_AIS_CONNECTION = "ais_connection"
 ISSUE_SOURCE_UNAVAILABLE = "source_unavailable"
-

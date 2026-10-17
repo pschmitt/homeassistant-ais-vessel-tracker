@@ -8,10 +8,17 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.util import slugify
 
-from .const import (CONF_AREA_NAME, CONF_AREAS, CONF_LATITUDE_NORTH,
-                    CONF_LATITUDE_SOUTH, CONF_LONGITUDE_EAST,
-                    CONF_LONGITUDE_WEST, CONF_MAP_RADIUS, CONF_ZONE_ENTITY,
-                    CONF_ZONE_RADIUS)
+from .const import (
+    CONF_AREA_NAME,
+    CONF_AREAS,
+    CONF_LATITUDE_NORTH,
+    CONF_LATITUDE_SOUTH,
+    CONF_LONGITUDE_EAST,
+    CONF_LONGITUDE_WEST,
+    CONF_MAP_RADIUS,
+    CONF_ZONE_ENTITY,
+    CONF_ZONE_RADIUS,
+)
 
 DEFAULT_AREA_NAME = "Home"
 
@@ -107,12 +114,8 @@ def area_zone_location(
                 pass
 
     try:
-        latitude = (
-            float(area[CONF_LATITUDE_SOUTH]) + float(area[CONF_LATITUDE_NORTH])
-        ) / 2
-        longitude = (
-            float(area[CONF_LONGITUDE_WEST]) + float(area[CONF_LONGITUDE_EAST])
-        ) / 2
+        latitude = (float(area[CONF_LATITUDE_SOUTH]) + float(area[CONF_LATITUDE_NORTH])) / 2
+        longitude = (float(area[CONF_LONGITUDE_WEST]) + float(area[CONF_LONGITUDE_EAST])) / 2
         radius = float(area.get(CONF_ZONE_RADIUS, 100))
     except (KeyError, TypeError, ValueError):
         return None
@@ -142,18 +145,14 @@ def area_map_location(
     return (latitude, longitude, max(radius, map_radius))
 
 
-def area_bounding_box(
-    hass: HomeAssistant, area: dict[str, Any]
-) -> list[list[float]] | None:
+def area_bounding_box(hass: HomeAssistant, area: dict[str, Any]) -> list[list[float]] | None:
     """Convert a circular HA zone into an AISStream square bounding box."""
     location = area_map_location(hass, area)
     if location is None:
         return None
     latitude, longitude, radius = location
     latitude_delta = radius / 111_320
-    longitude_delta = radius / (
-        111_320 * max(abs(cos(radians(latitude))), 0.01)
-    )
+    longitude_delta = radius / (111_320 * max(abs(cos(radians(latitude))), 0.01))
     return [
         [latitude - latitude_delta, longitude - longitude_delta],
         [latitude + latitude_delta, longitude + longitude_delta],

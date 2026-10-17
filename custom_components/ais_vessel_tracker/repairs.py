@@ -19,9 +19,7 @@ class AisVesselTrackerRepairFlow(RepairsFlow):
         """Initialize the repair flow."""
         self.entry_id = entry_id
 
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> RepairsFlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> RepairsFlowResult:
         """Start the repair flow."""
         del user_input
         return await self.async_step_configure()
@@ -30,9 +28,7 @@ class AisVesselTrackerRepairFlow(RepairsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> RepairsFlowResult:
         """Handle the repair form."""
-        entry: ConfigEntry | None = self.hass.config_entries.async_get_entry(
-            self.entry_id
-        )
+        entry: ConfigEntry | None = self.hass.config_entries.async_get_entry(self.entry_id)
         if entry is None:
             return self.async_abort(reason="entry_not_found")
 
@@ -52,9 +48,7 @@ class AisVesselTrackerRepairFlow(RepairsFlow):
             else:
                 updated = {**current, **user_input}
                 updated.pop(CONF_AREA_COUNT, None)
-                self.hass.config_entries.async_update_entry(
-                    entry, data=updated, options={}
-                )
+                self.hass.config_entries.async_update_entry(entry, data=updated, options={})
                 await self.hass.config_entries.async_reload(entry.entry_id)
                 return self.async_create_entry(data={})
 

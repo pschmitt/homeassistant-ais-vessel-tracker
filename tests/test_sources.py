@@ -7,13 +7,7 @@ import sys
 import unittest
 from pathlib import Path
 
-
-MODULE_PATH = (
-    Path(__file__).parents[1]
-    / "custom_components"
-    / "ais_vessel_tracker"
-    / "sources.py"
-)
+MODULE_PATH = Path(__file__).parents[1] / "custom_components" / "ais_vessel_tracker" / "sources.py"
 SPEC = importlib.util.spec_from_file_location("ais_vessel_tracker_sources", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 sources = importlib.util.module_from_spec(SPEC)
@@ -76,9 +70,7 @@ class SourceParserTest(unittest.TestCase):
         self.assertIsNotNone(observation)
         assert observation is not None
         self.assertEqual(observation.mmsi, "002182801")
-        self.assertIsNone(
-            sources.parse_aiscatcher_message({"mmsi": 123456})
-        )
+        self.assertIsNone(sources.parse_aiscatcher_message({"mmsi": 123456}))
 
     def test_aiscatcher_non_vessel_message_types_are_ignored_by_default(self) -> None:
         for message_type in (4, 9, 11, 21):
