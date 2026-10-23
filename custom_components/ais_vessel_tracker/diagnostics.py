@@ -46,11 +46,11 @@ async def async_get_config_entry_diagnostics(
             "title": config_entry.title,
             "data": async_redact_data(
                 dict(config_entry.data),
-                {CONF_AISHUB_USERNAME, CONF_SEARXNG_PASSWORD},
+                {CONF_API_KEY, CONF_AISHUB_USERNAME, CONF_SEARXNG_PASSWORD},
             ),
             "options": async_redact_data(
                 dict(config_entry.options),
-                {CONF_AISHUB_USERNAME, CONF_SEARXNG_PASSWORD},
+                {CONF_API_KEY, CONF_AISHUB_USERNAME, CONF_SEARXNG_PASSWORD},
             ),
         },
         "settings": {
