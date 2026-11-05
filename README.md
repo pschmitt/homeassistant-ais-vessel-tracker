@@ -1,5 +1,7 @@
 # AIS Vessel Tracker for Home Assistant
 
+[![Open this integration in Home Assistant Marketplace](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=pschmitt&repository=homeassistant-ais-vessel-tracker&category=integration)
+
 AIS Vessel Tracker is a Home Assistant custom integration for monitoring vessels
 inside one or more configurable geographic areas. It can combine the live
 [AISStream.io](https://aisstream.io) WebSocket service with locally received
@@ -29,11 +31,11 @@ Assistant integration; no additional daemon is needed.
 
 ## Installation
 
-Install the integration with HACS as a custom repository, or clone this
-repository and copy `custom_components/ais_vessel_tracker` into Home Assistant's
-`custom_components` directory. The repository is named
-`homeassistant-ais-vessel-tracker` to match the other local Home Assistant
-components.
+Use the Marketplace badge above to add this repository as a custom integration
+(Home Assistant 2026.11 or later). On older versions, add it as a custom
+repository in HACS. Alternatively, clone it and copy
+`custom_components/ais_vessel_tracker` into Home Assistant's
+`custom_components` directory.
 
 Restart Home Assistant and add **AIS Vessel Tracker** from
 **Settings → Devices & services → Add integration**.
