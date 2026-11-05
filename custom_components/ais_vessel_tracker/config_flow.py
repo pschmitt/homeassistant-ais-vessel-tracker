@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import Any
 from urllib.parse import urlparse
 
-import voluptuous as vol
-from homeassistant import config_entries
+import probatio as vol
+from homeassistant import config_entries, data_entry_flow
 from homeassistant.config_entries import ConfigEntry, OptionsFlowWithReload
 from homeassistant.core import callback
 from homeassistant.helpers.selector import (
@@ -92,29 +92,38 @@ def _common_schema(
                     default=defaults.get(CONF_AISSTREAM_ENABLED, True),
                 ): BooleanSelector(),
                 (
-                    vol.Required(CONF_API_KEY)
+                    data_entry_flow.Required(
+                        CONF_API_KEY, visible={"field": CONF_AISSTREAM_ENABLED, "value": True}
+                    )
                     if api_key_required
-                    else vol.Optional(CONF_API_KEY, default=defaults.get(CONF_API_KEY, ""))
+                    else data_entry_flow.Optional(
+                        CONF_API_KEY,
+                        default=defaults.get(CONF_API_KEY, ""),
+                        visible={"field": CONF_AISSTREAM_ENABLED, "value": True},
+                    )
                 ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
                 vol.Required(
                     CONF_LOCAL_MQTT_ENABLED,
                     default=defaults.get(CONF_LOCAL_MQTT_ENABLED, True),
                 ): BooleanSelector(),
-                vol.Required(
+                data_entry_flow.Required(
                     CONF_LOCAL_MQTT_TOPIC,
                     default=defaults.get(CONF_LOCAL_MQTT_TOPIC, "ais-catcher/ais"),
+                    visible={"field": CONF_LOCAL_MQTT_ENABLED, "value": True},
                 ): TextSelector(),
-                vol.Required(
+                data_entry_flow.Required(
                     CONF_INCLUDE_NON_VESSEL_STATIONS,
                     default=defaults.get(CONF_INCLUDE_NON_VESSEL_STATIONS, False),
+                    visible={"field": CONF_LOCAL_MQTT_ENABLED, "value": True},
                 ): BooleanSelector(),
                 vol.Required(
                     CONF_AISHUB_ENABLED,
                     default=defaults.get(CONF_AISHUB_ENABLED, False),
                 ): BooleanSelector(),
-                vol.Optional(
+                data_entry_flow.Optional(
                     CONF_AISHUB_USERNAME,
                     default=defaults.get(CONF_AISHUB_USERNAME, ""),
+                    visible={"field": CONF_AISHUB_ENABLED, "value": True},
                 ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
             }
         )
@@ -134,9 +143,11 @@ def _aisstream_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
                 CONF_AISSTREAM_ENABLED,
                 default=defaults.get(CONF_AISSTREAM_ENABLED, True),
             ): BooleanSelector(),
-            vol.Optional(CONF_API_KEY, default=defaults.get(CONF_API_KEY, "")): TextSelector(
-                TextSelectorConfig(type=TextSelectorType.PASSWORD)
-            ),
+            data_entry_flow.Optional(
+                CONF_API_KEY,
+                default=defaults.get(CONF_API_KEY, ""),
+                visible={"field": CONF_AISSTREAM_ENABLED, "value": True},
+            ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
         }
     )
 
@@ -150,13 +161,15 @@ def _local_mqtt_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
                 CONF_LOCAL_MQTT_ENABLED,
                 default=defaults.get(CONF_LOCAL_MQTT_ENABLED, True),
             ): BooleanSelector(),
-            vol.Required(
+            data_entry_flow.Required(
                 CONF_LOCAL_MQTT_TOPIC,
                 default=defaults.get(CONF_LOCAL_MQTT_TOPIC, "ais-catcher/ais"),
+                visible={"field": CONF_LOCAL_MQTT_ENABLED, "value": True},
             ): TextSelector(),
-            vol.Required(
+            data_entry_flow.Required(
                 CONF_INCLUDE_NON_VESSEL_STATIONS,
                 default=defaults.get(CONF_INCLUDE_NON_VESSEL_STATIONS, False),
+                visible={"field": CONF_LOCAL_MQTT_ENABLED, "value": True},
             ): BooleanSelector(),
         }
     )
@@ -171,9 +184,10 @@ def _aishub_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
                 CONF_AISHUB_ENABLED,
                 default=defaults.get(CONF_AISHUB_ENABLED, False),
             ): BooleanSelector(),
-            vol.Optional(
+            data_entry_flow.Optional(
                 CONF_AISHUB_USERNAME,
                 default=defaults.get(CONF_AISHUB_USERNAME, ""),
+                visible={"field": CONF_AISHUB_ENABLED, "value": True},
             ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
         }
     )
@@ -489,9 +503,8 @@ class AisVesselTrackerOptionsFlow(_AreaFlowMixin, OptionsFlowWithReload):
         errors: dict[str, str] = {}
         if user_input is not None:
             candidate = {**self._pending_settings, **user_input}
-            candidate[CONF_LOCAL_MQTT_TOPIC] = str(
-                user_input.get(CONF_LOCAL_MQTT_TOPIC, "")
-            ).strip()
+            if CONF_LOCAL_MQTT_TOPIC in user_input:
+                candidate[CONF_LOCAL_MQTT_TOPIC] = str(user_input[CONF_LOCAL_MQTT_TOPIC]).strip()
             error = _validate_common_input(candidate)
             if error:
                 errors["base"] = error

@@ -16,9 +16,8 @@
 
 ## Install
 
-Use the Marketplace badge above on Home Assistant 2026.11 or later to add this
-repository as a custom integration. On older versions, add it as a HACS
-custom repository of type **Integration**. Install and restart Home Assistant.
+Requires Home Assistant 2026.11 or later. Use the Marketplace badge above to add
+this repository as a custom integration, then install and restart Home Assistant.
 The badge does not imply a public catalog listing. For manual installation,
 copy `custom_components/ais_vessel_tracker/` into Home Assistant's
 `custom_components/` directory and restart.
